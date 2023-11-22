@@ -127,7 +127,10 @@ create or replace package "PKG_EMP_SRV" as
     --==============================================================================
     procedure p_sal_rep(
         p_dept_id in number default null);            
-
+    --==============================================================================
+    -- procedure whole unit test
+    --==============================================================================
+    procedure p_utest;
 end "PKG_EMP_SRV";
 /
 create or replace package body "PKG_EMP_SRV" as
@@ -163,7 +166,7 @@ create or replace package body "PKG_EMP_SRV" as
                 values (p_emp_id, p_ename, p_job, p_mgr, p_hiredate, p_sal, p_dept_id) 
                     RETURNING EMP_ID INTO v_new_id;
             dbms_output.put_line('EMP record addad. EMP_ID = ' || v_new_id);
-            htp.p('EMP record addad. EMP_ID = ' || v_new_id);
+            htp.p('EMP record addad. EMP_ID = ' || v_new_id ||'<br>');
             return v_new_id;
 
             exception
@@ -171,7 +174,7 @@ create or replace package body "PKG_EMP_SRV" as
                 -- error handling
                 p_add_err_log(sysdate,SQLCODE,SUBSTR($$PLSQL_UNIT  || '.f_add_emp  @ ' || SQLERRM, 1, 200) );
                 dbms_output.put_line('EMP record did not add. EMP_ID = ' || SQLERRM);
-                htp.p('EMP record did not add. EMP_ID = ' || SQLERRM);
+                htp.p('EMP record did not add. EMP_ID = ' || SQLERRM ||'<br>');
 
                 return -1; 
         end;
@@ -204,7 +207,7 @@ create or replace package body "PKG_EMP_SRV" as
             if c_emp%notfound then
                 close c_emp;
                 dbms_output.put_line('EMP not found. EMP_ID = ' || p_emp_id);
-                htp.p('EMP not found. EMP_ID = ' || p_emp_id);
+                htp.p('EMP not found. EMP_ID = ' || p_emp_id||'<br>');
                 return;
             end if;
             close c_emp;
@@ -214,7 +217,7 @@ create or replace package body "PKG_EMP_SRV" as
                        insert into SAL_LOG (EMP_ID,DATE_LOG,SAL)
                         values (p_emp_id,sysdate,t_emp.sal);
                 dbms_output.put_line('EMP salary updated. EMP_ID = ' || p_emp_id || '  ' || 'New salary = ' || trunc(t_emp.sal + t_emp.sal/100 * p_percent) );
-                htp.p('EMP salary updated. EMP_ID = ' || p_emp_id || '  ' || 'New salary = ' || trunc(t_emp.sal + t_emp.sal/100 * p_percent) );
+                htp.p('EMP salary updated. EMP_ID = ' || p_emp_id || '  ' || 'New salary = ' || trunc(t_emp.sal + t_emp.sal/100 * p_percent) ||'<br>');
 
            exception
                 when others then 
@@ -234,13 +237,13 @@ create or replace package body "PKG_EMP_SRV" as
                 DEPT_ID =  p_new_dept
                 where emp_id = p_emp_id;
             dbms_output.put_line('Employee transfered. EMP_ID = ' || p_emp_id || ' New DEPT_ID = ' || p_new_dept);
-            htp.p('Employee transfered. EMP_ID = ' || p_emp_id || ' New DEPT_ID = ' || p_new_dept);
+            htp.p('Employee transfered. EMP_ID = ' || p_emp_id || ' New DEPT_ID = ' || p_new_dept||'<br>');
            exception
                 when others then 
                 -- error handling
                 p_add_err_log(sysdate,SQLCODE,SUBSTR($$PLSQL_UNIT  || '.p_emp_transfer  @ ' || SQLERRM, 1, 200) );
                 dbms_output.put_line('Error during operation. Probably wrong DEPT_ID parameter');
-                htp.p('Error during operation. Probably wrong DEPT_ID parameter');
+                htp.p('Error during operation. Probably wrong DEPT_ID parameter'||'<br>');
 
         end;          
     --==============================================================================
@@ -261,7 +264,7 @@ create or replace package body "PKG_EMP_SRV" as
             fetch c_sal into v_sal;
             close c_sal;
             dbms_output.put_line('Employee EMP_ID = ' || p_emp_id || ' Salary = ' || v_sal);
-            htp.p('Employee EMP_ID = ' || p_emp_id || ' Salary = ' || v_sal);
+            htp.p('Employee EMP_ID = ' || p_emp_id || ' Salary = ' || v_sal||'<br>');
             return v_sal;
            exception
            -- error handling
@@ -291,10 +294,11 @@ create or replace package body "PKG_EMP_SRV" as
                     htp.tabledata(i.DEPT_NAME);
                     htp.tabledata(i.EMP_ID);
                     htp.tabledata(i.ENAME);
-                    htp.tabledata(i.HIREDATE);
+                    htp.tabledata(to_char(i.HIREDATE,'dd.mm.yyyy'));
                 htp.tablerowclose();
            end loop;
            htp.tableclose();
+           htp.p('<br>');
            htp.bodyclose();
            htp.htmlclose();
            exception
@@ -328,16 +332,46 @@ create or replace package body "PKG_EMP_SRV" as
                 htp.tablerowclose();
            end loop;
            htp.tableclose();
+           htp.p('<br>');
            htp.bodyclose();
            htp.htmlclose();
            exception
                 when others then 
                 -- error handling
                 p_add_err_log(sysdate,SQLCODE,SUBSTR($$PLSQL_UNIT  || '.p_sal_rep  @ ' || SQLERRM, 1, 200) );            
-        end;             
+        end;  
+--==============================================================================
+-- procedure whole unit test
+--==============================================================================        
+        procedure p_utest 
+            is 
+            v_EMP number := 90021;
+            begin
+                dbms_output.put_line('Add new employeer');
+                v_EMP := PKG_EMP_SRV.f_add_emp(null,'TEST EMP', 'TEST EMP',null,sysdate,148000,1); 
+                dbms_output.put_line('Displaying the report with this employeer');
+                PKG_EMP_SRV.p_dept_rep(p_dept_id => 1);
+                dbms_output.put_line('Checking current salary');
+                PKG_EMP_SRV.p_return_sal(p_emp_id => v_EMP);  
+                dbms_output.put_line('Salary doubling');
+                PKG_EMP_SRV.p_change_sal(p_emp_id => v_EMP,p_percent => 100);
+                dbms_output.put_line('Checking new salary');
+                PKG_EMP_SRV.p_return_sal(p_emp_id => v_EMP);  
+                dbms_output.put_line('Transfering to DEPT = 2 ');
+                PKG_EMP_SRV.p_emp_transfer(p_emp_id => v_EMP,p_new_dept => 2);
+                dbms_output.put_line('Displaying the report with this employeer in DEPT = 2');
+                PKG_EMP_SRV.p_dept_rep(p_dept_id => 2);
+                dbms_output.put_line('Checking total salary information');
+                htp.p('Checking total salary information');
+                PKG_EMP_SRV.p_sal_rep(p_dept_id => null);
+                dbms_output.put_line('Deleting test employeer');
+                delete emp_data where emp_id = v_EMP;
+                commit;
+            end;
+
+
 end "PKG_EMP_SRV";
 /
-
 -- Filling in the information for EMP_DATA
 declare v_ret number;
     begin 
