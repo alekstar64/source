@@ -1,0 +1,365 @@
+﻿Imports System.Drawing
+Imports System.ComponentModel
+Imports System.IO
+Imports System.Runtime.Serialization
+Imports System.Runtime.Serialization.Formatters.Binary
+
+Imports System.Threading
+Imports System.Net.Sockets
+Imports System.Windows.Threading
+
+Public Class Server1
+    'string sName=Server.MachineName.ToString()
+    Private byteData(63) As Byte
+    Private clientSocket As Socket
+    Private netStream As NetworkStream
+    Private ConnectedHost As Boolean = False
+    Private c_IsActive As Boolean
+    Private c_Deny As Boolean
+    Private c_URL As String
+    Private c_grequest As String
+    Private c_UserName As String
+    'Private c_DATA_BUFF As String
+    Private c_TEXTBOX_BUFF As String
+    Private c_IP As String
+    Private c_MachineName As String
+    Private c_Request As String = ""
+    Private c_Connected As Date
+    Private c_Stat As Short
+    Private c_UScreen As Short
+    Private c_RecCount As Long
+    Private c_LastRec As Date
+    Private c_Socket As Socket
+
+
+    Private Context As SynchronizationContext
+    Public Event Disconnected()
+
+    Public Sub StartConnection()
+        'Dim t As New Thread(AddressOf Main)
+        't.Start()
+    End Sub
+    Public Property Last_Len_IMG As Long
+
+    Public Property URL As String
+        Set(Value As String) 'Сеттер
+            c_URL = Value
+        End Set
+        Get
+            Return c_URL 'Геттер
+        End Get
+    End Property
+
+    Public Property grequest As String
+        Set(Value As String) 'Сеттер
+            c_grequest = Value
+        End Set
+        Get
+            Return c_grequest 'Геттер
+        End Get
+    End Property
+
+    Public Property CRequest As String
+        Set(Value As String) 'Сеттер
+            c_Request = Value
+        End Set
+        Get
+            Return c_Request 'Геттер
+        End Get
+    End Property
+
+    Public Property MachineName As String
+        Set(Value As String) 'Сеттер
+            c_MachineName = Value
+        End Set
+        Get
+            Return c_MachineName 'Геттер
+        End Get
+    End Property
+    Public Property UserName As String
+        Set(Value As String) 'Сеттер
+            c_UserName = Value
+        End Set
+        Get
+            Return c_UserName 'Геттер
+        End Get
+    End Property
+
+    Public Sub New(ByVal p_URL As String, p_Socket As Socket)
+        c_URL = p_URL
+        'c_IP = p_IP
+        c_Connected = Now
+        c_Stat = 0
+        c_Socket = p_Socket
+        c_IsActive = True
+        'Cam = New Camera
+        'clientSocket = New TcpClient
+        netStream = netStream
+        c_Deny = True
+        c_grequest = ""
+        Try
+            ' раскомментировать для приема данных - не стабильно работает. вешает или выпадает после реконнекта
+            Me.Socket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, New AsyncCallback(AddressOf OnRecieve), Me.Socket)
+            Me.IsActive = True
+            Me.Stat = 1 'ожидание получения номера активного экрана
+            'Dim BMP As Bitmap = TakeImage(SX, SY, SWidth, SHeight)
+            'Clients_LIST(i).SendImage(BMP, False)
+            Me.LastRec = Now
+            Me.Deny = False
+            'System.Threading.Thread.Sleep(300)
+            'Send(f_get_for_send(Clients_LIST(i).Socket), Clients_LIST(i).Socket, i)
+        Catch ex As Exception
+            p_errlog("Sub_AddClient", "BeginReceive", Err.Description)
+        End Try
+        'Cam.Start(Nothing)
+    End Sub
+    Private Sub OnRecieve(ByVal ar As IAsyncResult)
+        Dim client As Socket = ar.AsyncState
+        'Dim byteData(1) As Byte
+        Dim bytesRec As Byte() = byteData
+        Dim message As String = System.Text.ASCIIEncoding.UTF8.GetString(byteData)
+        'Dim byteData(1) As Byte
+        ReDim byteData(63)
+        Dim i As Short
+
+        If client.Connected Then
+            Try
+
+                Me.CRequest = message
+
+
+                client.EndReceive(ar)
+                count_PAC_S_REC = count_PAC_S_REC + 1
+                count_Byte_S_REC = count_Byte_S_REC + message.Length
+                'Read(Trim(message), Clients_LIST(i).URL)
+                'Clients_LIST(i).Socket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, New AsyncCallback(AddressOf OnRecieve), Clients_LIST(i).Socket)
+                'Clients_LIST(i).Socket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, New AsyncCallback(AddressOf OnRecieve), Clients_LIST(i).Socket)
+                'For i As Short = 0 To Clients_LIST.Count - 1
+                '    If Clients_LIST(i).URL = clientSocket.RemoteEndPoint.ToString Then
+                '        Clients_LIST(i).Stat = 2
+                '    End If
+                'Next
+            Catch ex As Exception
+                'client.Close()
+                'client.Dispose()
+                'Del_Client = i
+                'Clients_LIST.RemoveAt(i)
+                'ClientsShow.Items.RemoveAt(i)
+                p_errlog("Sub OnRecieve", "BeginReceive", Err.Description)
+            End Try
+        Else
+            For i = 0 To Clients_LIST.Count - 1
+                If Clients_LIST(i).URL = client.RemoteEndPoint.ToString Then
+                    'Clients_LIST(i).Stat = 2
+                    Exit For
+                End If
+            Next
+            p_errlog("OnRecieve", "NOT_Connected " & Clients_LIST(i).Connected & " " & Clients_LIST(i).URL, "Error")
+            'SocketException(client, i)
+            'Stop
+        End If
+        ' ''''''''''''
+        ''    StrData = ""
+        ' ''''''''''''
+
+
+        'Dim client As Socket = ar.AsyncState
+        'client.EndReceive(ar)
+
+        'Dim bytesRec As Byte() = byteData
+        'Dim message As String = System.Text.ASCIIEncoding.ASCII.GetString(bytesRec)
+        'Read(message)
+        'clientSocket.BeginReceive(byteData, 0, byteData.Length, SocketFlags.None, _
+        '                          New AsyncCallback(AddressOf OnRecieve), clientSocket)
+    End Sub
+
+    Public Property IP As String
+        Set(Value As String) 'Сеттер
+            c_IP = Value
+        End Set
+        Get
+            Return c_IP 'Геттер
+        End Get
+    End Property
+    Public Property LastRec As Date
+        Set(Value As Date) 'Сеттер
+            c_LastRec = Value
+        End Set
+        Get
+            Return c_LastRec 'Геттер
+        End Get
+    End Property
+    Public Property Connected As Date
+        Set(Value As Date) 'Сеттер
+            c_Connected = Value
+        End Set
+        Get
+            Return c_Connected 'Геттер
+        End Get
+    End Property
+    Public Property Deny As Boolean
+        Set(Value As Boolean) 'Сеттер
+            c_Deny = Value
+            'If Value Then Stop
+        End Set
+        Get
+            Return c_Deny   'Геттер
+        End Get
+    End Property
+    Public Property IsActive As Boolean
+        Set(Value As Boolean) 'Сеттер
+            c_IsActive = Value
+            'If Value Then Stop
+        End Set
+        Get
+            Return c_IsActive  'Геттер
+        End Get
+    End Property
+
+    Public Property Stat As Short
+        Set(Value As Short) 'Сеттер
+            c_Stat = Value
+        End Set
+        Get
+            Return c_Stat 'Геттер
+        End Get
+    End Property
+    Public Property UScreen As Short
+        Set(Value As Short) 'Сеттер
+            c_UScreen = Value
+        End Set
+        ' условный номер экрана или активности клиента
+        Get
+            Return c_UScreen 'Геттер
+        End Get
+    End Property
+    Public Property RecCount As Long ' счетчик байт/сек.
+        Set(Value As Long) 'Сеттер
+            c_RecCount = Value
+        End Set
+        Get
+            Return c_RecCount 'Геттер
+        End Get
+    End Property
+    'Public Property Cam As Camera
+    Public Property Socket As System.Net.Sockets.Socket
+        Set(Value As System.Net.Sockets.Socket) 'Сеттер
+            c_Socket = Value
+            'c_Socket.SendTimeout = 1000
+        End Set
+        Get
+            Return c_Socket 'Геттер
+        End Get
+    End Property
+
+    Public Property TEXTBOX_BUFF As String
+        Set(Value As String) 'Сеттер
+            c_TEXTBOX_BUFF = Value
+        End Set
+        Get
+            Return c_TEXTBOX_BUFF 'Геттер
+        End Get
+    End Property
+    ' '' '' ''WPF
+    ' '' '' ''    Delegate Sub SetTextCallback(ByVal p_text As String)
+    Public Sub SetText(ByVal p_text As String)
+        ' InvokeRequired required compares the thread ID of the
+        ' calling thread to the thread ID of the creating thread.
+        ' If these threads are different, it returns true.
+
+        '' '' '' '' WPF If c_TEXTBOX_BUFF.InvokeRequired Then
+        '' '' '' ''    Dim d As New SetTextCallback(AddressOf SetText)
+        '' '' '' ''    c_TEXTBOX_BUFF.Invoke(d, New Object() {p_text})
+        '' '' '' ''    v_http_conflict_count += 1
+        '' '' '' ''Else
+        c_TEXTBOX_BUFF = p_text
+        '' '' '' ''End If
+    End Sub
+    Public Overrides Function ToString() As String
+        Return c_URL & " " & c_IP & " " & Format(c_Connected, "dd.MM.yyyy hh:mm:ss") & " " & c_Stat
+    End Function
+    Private Sub Main()
+
+        'Dim Bmp As Bitmap
+        ConnectedHost = True
+        Do
+            Thread.Sleep(1000)
+            ' Stop
+            'Bmp = Cam.CopyFrame(Bmp, New RectangleF(0, 0, 100, 100))
+            'Me.Socket.se()
+            'Clients_LIST(0).SendImage(TakeImage(0, 0, Me.Width, Me.Height))
+        Loop
+        'netStream = clientSocket.GetStream()
+        'While clientSocket.Connected And ConnectedHost
+        ''If Cam.Running Then
+        'Try
+        '    Dim BMP As Bitmap = TakeImage(GX, GY, GWidth, GHeight)
+        '    If LastBM Is Nothing Then
+        '        Me.SendImage(BMP)
+        '        LastBM = BMP
+        '    ElseIf Not AreEqual(BMP, LastBM) Then
+        '        'ElseIf Not Equal(BMP, LastBM) And Not LastBM Is Nothing Then
+        '        Me.SendImage(BMP)
+        '        LastBM = BMP
+        '    Else
+
+        '    End If
+
+
+        '    Dim ms As New MemoryStream()
+        '    Bmp.Save(ms, Imaging.ImageFormat.Jpeg) 'Change the format so we can pass a smaller image
+        '    Dim Img As Image = Image.FromStream(ms)
+        '    If SendImage(Img) = False Then Exit While
+        'Thread.Sleep(1000) 'Decreasing the time the calculation were taken (So each frame delay will be true)
+        'Stop
+        'Catch ex As Exception
+        'Exit While
+        'End Try
+        'End If
+        'End While
+        'Context.Post(AddressOf Disconnect, Nothing)
+
+
+        'ConnectedHost = True
+        'netStream = clientSocket.GetStream()
+        'While clientSocket.Connected And ConnectedHost
+        '    If Cam.Running Then
+        '        Try
+        '            Dim Bmp As Bitmap
+        '            Bmp = Cam.CopyFrame(PicBox, New RectangleF(0, 0, CameraOutputSize.Width, CameraOutputSize.Height))
+        '            Dim ms As New MemoryStream()
+        '            Bmp.Save(ms, Imaging.ImageFormat.Jpeg) 'Change the format so we can pass a smaller image
+        '            Dim Img As Image = Image.FromStream(ms)
+        '            If SendImage(Img) = False Then Exit While
+        '            Thread.Sleep(1000) 'Decreasing the time the calculation were taken (So each frame delay will be true)
+        '        Catch ex As Exception
+        '            Exit While
+        '        End Try
+        '    End If
+        'End While
+        'Context.Post(AddressOf Disconnect, Nothing)
+    End Sub
+
+    Private Sub Disconnect()
+        On Error Resume Next
+        If ConnectedHost Then
+            ConnectedHost = False
+            Dim SBufferSize, RBufferSize As Integer 'Get all of the current client socket properties so we can redeclare it with the previous settings (because it's being disposed)
+            Dim NoDelay As Boolean
+            SBufferSize = clientSocket.SendBufferSize
+            RBufferSize = clientSocket.ReceiveBufferSize
+            NoDelay = clientSocket.NoDelay
+            clientSocket.Disconnect(False)
+            clientSocket.Close()
+            'clientSocket = New TcpClient()
+            'clientSocket.SendBufferSize = SBufferSize
+            'clientSocket.ReceiveBufferSize = RBufferSize
+            'clientSocket.NoDelay = NoDelay
+            '       RaiseEvent Disconnected()
+        End If
+    End Sub
+    'Private Sub EventRaise(ByVal e As Events, ByVal Arg As Object)
+    'Context.Post(AddressOf EventHandler, New EventArgs(e, Arg))
+    ' End Sub
+
+End Class

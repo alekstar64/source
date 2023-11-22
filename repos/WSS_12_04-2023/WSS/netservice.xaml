@@ -1,0 +1,78 @@
+﻿<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av" x:Class="netservice"
+    Title="Sending Data Manager" Height="691" Width="937" x:Name="netservice">
+    <Grid x:Name="Grid1" Height="640" Width="855">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="446*" />
+            <RowDefinition Height="5*" />
+        </Grid.RowDefinitions>
+        <Grid Margin="373,25,18,403"  >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="397*" />
+                <ColumnDefinition Width="14*" />
+                <ColumnDefinition Width="82*" />
+            </Grid.ColumnDefinitions>
+            <TextBox Height="31" HorizontalAlignment="Left" Margin="24,102,0,0" x:Name="Json" VerticalAlignment="Top" Width="306" />
+            <Label Content="Memory size(GC):" HorizontalAlignment="Left" Margin="24,26,0,0" VerticalAlignment="Top" Width="105"/>
+            <Label Content="0" x:Name="lblmem" HorizontalAlignment="Left" Margin="134,26,0,0" VerticalAlignment="Top" Width="196" Background="#FFFDF9F9"/>
+            <Slider x:Name="sl_Capacity" HorizontalAlignment="Left" Height="19" Margin="155,70,0,0" VerticalAlignment="Top" Width="140" Minimum="10" Maximum="1000" Value="1" ValueChanged="sl_Capacity_ValueChanged" SmallChange="10" SelectionStart="8" />
+            <Label Content="Refresh time (mSec) :" HorizontalAlignment="Left" Margin="24,63,0,0" VerticalAlignment="Top" Width="122"/>
+            <Label x:Name="lbl_Capacity" Content="1" HorizontalAlignment="Left" Margin="300,63,0,0" VerticalAlignment="Top" Width="42"/>
+        </Grid>
+        <Label Height="25" x:Name="lbl_Client" Width="835" BorderThickness="1" BorderBrush="#FF270707" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,236,0,0" FontFamily="Courier New" FontWeight="SemiBold" Content="Total clients : 0" />
+
+        <GroupBox Header="Total sended:" Height="103" HorizontalAlignment="Left" Margin="12,48,0,0" x:Name="GroupBox1" VerticalAlignment="Top" Width="147">
+            <Grid>
+                <Label Content="Packages:" Height="27" HorizontalAlignment="Left" Margin="6,0,0,0" x:Name="Label1" VerticalAlignment="Top" Width="58" />
+                <Label Content="KBytes :" HorizontalAlignment="Left" Margin="6,22,0,31" x:Name="Label2" Width="58" />
+                <Label Content="Error:" Height="27" HorizontalAlignment="Left" Margin="6,47,0,0" x:Name="Label3" VerticalAlignment="Top" Width="58" />
+                <Label Content="0" Height="27" HorizontalAlignment="Left" Margin="70,0,0,0" x:Name="lbl_Pac" VerticalAlignment="Top" Width="59" />
+                <Label Content="0" Height="27" HorizontalAlignment="Left" Margin="70,22,0,0" x:Name="lbl_Byte" VerticalAlignment="Top" Width="59" />
+                <Label Content="0" Height="27" HorizontalAlignment="Left" Margin="70,47,0,0" x:Name="lbl_Err" VerticalAlignment="Top" Width="59" />
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Total received:" Height="103" HorizontalAlignment="Left" Margin="173,48,0,0" x:Name="GroupBox2" VerticalAlignment="Top" Width="147">
+            <Grid>
+                <Label Content="Packages:" Height="27" HorizontalAlignment="Left" Margin="6,0,0,0" x:Name="Label4" VerticalAlignment="Top" Width="58" />
+                <Label Content="KBytes :" HorizontalAlignment="Left" Margin="6,22,0,31" x:Name="Label5" Width="58" />
+                <Label Content="Error:" Height="27" HorizontalAlignment="Left" Margin="6,47,0,0" x:Name="Label6" VerticalAlignment="Top" Width="58" />
+                <Label Content="0" Height="27" HorizontalAlignment="Left" Margin="70,0,0,0" x:Name="lbl_PAC_REC" VerticalAlignment="Top" Width="59" />
+                <Label Content="0" Height="27" HorizontalAlignment="Left" Margin="70,22,0,0" x:Name="lbl_Byte_REC" VerticalAlignment="Top" Width="59" />
+                <Label Content="0" Height="27" HorizontalAlignment="Left" Margin="70,47,0,0" x:Name="lbl_ERR_REC" VerticalAlignment="Top" Width="59" />
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Sended jast sec.:" Height="66" HorizontalAlignment="Left" Margin="16,155,0,0" x:Name="GroupBox3" VerticalAlignment="Top" Width="147">
+            <Grid Height="79" Width="136">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="49*" />
+                    <ColumnDefinition Width="86*" />
+                </Grid.ColumnDefinitions>
+                <Label Content="Packages:" Height="27" HorizontalAlignment="Left" Margin="6,0,0,0" x:Name="Label7" VerticalAlignment="Top" Width="58" Grid.ColumnSpan="2" />
+                <Label Content="KBytes :" HorizontalAlignment="Left" Margin="6,22,0,31" x:Name="Label8" Width="58" Grid.ColumnSpan="2" />
+                <Label Content="0" Height="27" HorizontalAlignment="Left" Margin="21,22,0,0" x:Name="lbl_Byte_S" VerticalAlignment="Top" Width="59" Grid.Column="1" />
+                <Label Content="0" Height="27" HorizontalAlignment="Left" Margin="21,0,0,0" x:Name="lbl_PAC_S" VerticalAlignment="Top" Width="59" Grid.Column="1" />
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Sended last sec.:" Height="66" HorizontalAlignment="Left" Margin="173,155,0,0" x:Name="GroupBox4" VerticalAlignment="Top" Width="147">
+            <Grid Height="79">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="49*" />
+                    <ColumnDefinition Width="86*" />
+                </Grid.ColumnDefinitions>
+                <Label Content="Packages:" Grid.ColumnSpan="2" Height="27" HorizontalAlignment="Left" Margin="6,0,0,0" x:Name="Label9" VerticalAlignment="Top" Width="58" />
+                <Label Content="KBytes :" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="6,22,0,31" x:Name="Label10" Width="58" />
+                <Label Content="0" Grid.Column="1" Height="27" HorizontalAlignment="Left" Margin="21,0,0,0" x:Name="lbl_PAC_S_REC" VerticalAlignment="Top" Width="59" />
+                <Label Content="0" Grid.Column="1" Height="27" HorizontalAlignment="Left" Margin="21,22,0,0" x:Name="lbl_Byte_S_REC" VerticalAlignment="Top" Width="59" />
+            </Grid>
+        </GroupBox>
+        <TextBox Height="24" HorizontalAlignment="Left" Margin="22,596,0,0" x:Name="txt_kill_Cl" Text="0" VerticalAlignment="Top" Width="37" />
+        <Button Content="Kill Client" HorizontalAlignment="Left" Margin="92,596,0,9" x:Name="cmd_Kill_Cl" Width="100" />
+        <Label Content="Started" Height="24" HorizontalAlignment="Left" Margin="17,16,0,0" x:Name="lbl_Start" VerticalAlignment="Top" Width="165" />
+        <Button Content="Button" HorizontalAlignment="Left" Margin="740,127,0,0" VerticalAlignment="Top" Click="Button_Click" Height="26" Width="57"/>
+        <Label Content="Current time" Height="24" HorizontalAlignment="Left" Margin="196,16,0,0" x:Name="lbl_Time" VerticalAlignment="Top" Width="123" />
+        <!-- ListBox>av:ItemsSource="{av:SampleData ItemCount=5}" -->
+        <ListBox x:Name="lst_Clients" HorizontalAlignment="Center" Height="320" Margin="0,261,0,0" VerticalAlignment="Top" Width="835"  />
+    </Grid>
+</Window>
