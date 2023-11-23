@@ -69,22 +69,23 @@ create or replace package "PKG_EMP_SRV" as
     -- add EMP_DATA record
     --==============================================================================
     procedure p_add_emp (       
-        p_emp_id     in     number default null,
-        p_ename      in     varchar2,
-        p_job        in     varchar2,
-        p_mgr        in     number default null,
-        p_hiredate   in     date default sysdate,
-        p_sal        in     number,
-        p_dept_id     in     number        
+        p_emp_id     in     number default null,    -- employee ID
+        p_ename      in     varchar2,               -- employee name        
+        p_job        in     varchar2,               -- employee job name
+        p_mgr        in     number default null,    -- manager
+        p_hiredate   in     date default sysdate,   -- when hired
+        p_sal        in     number,                 -- salary
+        p_dept_id     in     number                 -- dapartment ID 
         );
     function f_add_emp (
-        p_emp_id     in     number  default null,
-        p_ename      in     varchar2,
-        p_job        in     varchar2,
-        p_mgr        in     number default null,
-        p_hiredate   in     date default sysdate,
-        p_sal        in     number,
-        p_dept_id     in     number) 
+        p_emp_id     in     number default null,    -- employee ID
+        p_ename      in     varchar2,               -- employee name        
+        p_job        in     varchar2,               -- employee job name
+        p_mgr        in     number default null,    -- manager
+        p_hiredate   in     date default sysdate,   -- when hired
+        p_sal        in     number,                 -- salary
+        p_dept_id     in     number                 -- dapartment ID
+        ) 
             -- returning ID of new record
             -- if return -1 then error. Check details in ERR_LOG table
             return number;
@@ -104,26 +105,26 @@ create or replace package "PKG_EMP_SRV" as
         p_percent in number,
         p_date_of_change in date default sysdate);
     --==============================================================================
-    -- procedure EMP transfering     
+    -- procedure EMP transfering employeer to another department    
     --==============================================================================
     procedure p_emp_transfer(
         p_emp_id in number,
         p_new_dept in number,
         p_date_of_change in date default sysdate);
     --==============================================================================
-    -- PROCEDURE/function of salary 
+    -- PROCEDURE/function of salary - return current salary by emp
     --==============================================================================
     procedure p_return_sal(
         p_emp_id in number);
     function f_return_sal(
         p_emp_id in number) return number;
     --==============================================================================
-    -- procedure report dept
+    -- procedure report dept/dapts if p_dept_id is null then return whole report
     --==============================================================================
     procedure p_dept_rep(
         p_dept_id in number default null);            
     --==============================================================================
-    -- procedure report salary for dept
+    -- procedure report salary for dept 
     --==============================================================================
     procedure p_sal_rep(
         p_dept_id in number default null);            
@@ -139,39 +140,44 @@ create or replace package body "PKG_EMP_SRV" as
     -- declare v_ret number; begin v_ret := PKG_EMP_SRV.f_add_emp(null.'Alex', 'Employee',,,148000,1); end;
     --==============================================================================
     procedure p_add_emp (       
-        p_emp_id     in     number default null,
-        p_ename      in     varchar2,
-        p_job        in     varchar2,
-        p_mgr        in     number default null,
-        p_hiredate   in     date default sysdate,
-        p_sal        in     number,
-        p_dept_id     in     number        
+        p_emp_id     in     number default null,    -- employee ID
+        p_ename      in     varchar2,               -- employee name        
+        p_job        in     varchar2,               -- employee job name
+        p_mgr        in     number default null,    -- manager
+        p_hiredate   in     date default sysdate,   -- when hired
+        p_sal        in     number,                 -- salary
+        p_dept_id     in     number                 -- dapartment ID
         )  is
         v_ret number;
         begin
+            -- readressing to the function
             v_ret := f_add_emp(p_emp_id,p_ename,p_job,p_mgr,p_hiredate,p_sal,p_dept_id);
         end;    
     function f_add_emp (       
-        p_emp_id     in     number default null,
-        p_ename      in     varchar2,
-        p_job        in     varchar2,
-        p_mgr        in     number default null,
-        p_hiredate   in     date default sysdate,
-        p_sal        in     number,
-        p_dept_id     in     number        
+        p_emp_id     in     number default null,    -- employee ID
+        p_ename      in     varchar2,               -- employee name        
+        p_job        in     varchar2,               -- employee job name
+        p_mgr        in     number default null,    -- manager
+        p_hiredate   in     date default sysdate,   -- when hired
+        p_sal        in     number,                 -- salary
+        p_dept_id     in     number                 -- dapartment ID
         ) return number is
         v_new_id NUMBER;
         begin
+            -- inserting new employee
             INSERT into EMP_DATA (EMP_ID, ENAME, JOB, MGR, HIREDATE, SAL, DEPT_ID)            
                 values (p_emp_id, p_ename, p_job, p_mgr, p_hiredate, p_sal, p_dept_id) 
                     RETURNING EMP_ID INTO v_new_id;
+            -- messsage for SQL
             dbms_output.put_line('EMP record addad. EMP_ID = ' || v_new_id);
+            -- messsage for WEB
             htp.p('EMP record addad. EMP_ID = ' || v_new_id ||'<br>');
             return v_new_id;
 
             exception
                 when others then 
                 -- error handling
+                -- $$PLSQL_UNIT - return object name
                 p_add_err_log(sysdate,SQLCODE,SUBSTR($$PLSQL_UNIT  || '.f_add_emp  @ ' || SQLERRM, 1, 200) );
                 dbms_output.put_line('EMP record did not add. EMP_ID = ' || SQLERRM);
                 htp.p('EMP record did not add. EMP_ID = ' || SQLERRM ||'<br>');
@@ -197,7 +203,7 @@ create or replace package body "PKG_EMP_SRV" as
     --==============================================================================
     procedure p_change_sal(
         p_emp_id in number,
-        p_percent in number,
+        p_percent in number,                            -- percentage size. can be a negative
         p_date_of_change in date default sysdate) is
         cursor c_emp is select * from emp_data where emp_id = p_emp_id;
         t_emp c_emp%ROWTYPE;
@@ -205,6 +211,7 @@ create or replace package body "PKG_EMP_SRV" as
             open c_emp;
             fetch c_emp into t_emp;
             if c_emp%notfound then
+                -- something wrong. employee not found
                 close c_emp;
                 dbms_output.put_line('EMP not found. EMP_ID = ' || p_emp_id);
                 htp.p('EMP not found. EMP_ID = ' || p_emp_id||'<br>');
@@ -212,6 +219,7 @@ create or replace package body "PKG_EMP_SRV" as
             end if;
             close c_emp;
             update emp_data set
+                -- calculating a new salary
                 sal = trunc(t_emp.sal + t_emp.sal/100 * p_percent)
                 where emp_id = p_emp_id; 
                        insert into SAL_LOG (EMP_ID,DATE_LOG,SAL)
@@ -229,10 +237,9 @@ create or replace package body "PKG_EMP_SRV" as
     --==============================================================================
     procedure p_emp_transfer(
         p_emp_id in number,
-        p_new_dept in number,
+        p_new_dept in number,    -- new department ID. 
         p_date_of_change in date default sysdate) is 
         begin
-            null;
            update emp_data set 
                 DEPT_ID =  p_new_dept
                 where emp_id = p_emp_id;
