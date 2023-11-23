@@ -169,9 +169,9 @@ create or replace package body "PKG_EMP_SRV" as
                 values (p_emp_id, p_ename, p_job, p_mgr, p_hiredate, p_sal, p_dept_id) 
                     RETURNING EMP_ID INTO v_new_id;
             -- messsage for SQL
-            dbms_output.put_line('EMP record addad. EMP_ID = ' || v_new_id);
+            dbms_output.put_line('EMP record added. EMP_ID = ' || v_new_id);
             -- messsage for WEB
-            htp.p('EMP record addad. EMP_ID = ' || v_new_id ||'<br>');
+            htp.p('EMP record added. EMP_ID = ' || v_new_id ||'<br>');
             return v_new_id;
 
             exception
@@ -224,8 +224,8 @@ create or replace package body "PKG_EMP_SRV" as
                 where emp_id = p_emp_id; 
                        insert into SAL_LOG (EMP_ID,DATE_LOG,SAL)
                         values (p_emp_id,sysdate,t_emp.sal);
-                dbms_output.put_line('EMP salary updated. EMP_ID = ' || p_emp_id || '  ' || 'New salary = ' || trunc(t_emp.sal + t_emp.sal/100 * p_percent) );
-                htp.p('EMP salary updated. EMP_ID = ' || p_emp_id || '  ' || 'New salary = ' || trunc(t_emp.sal + t_emp.sal/100 * p_percent) ||'<br>');
+                dbms_output.put_line('EMP salary updated on ' || p_percent || '%. EMP_ID = ' || p_emp_id || '  ' || 'New salary = ' || trunc(t_emp.sal + t_emp.sal/100 * p_percent) );
+                htp.p('EMP salary updated on ' || p_percent || '%. EMP_ID = ' || p_emp_id || '  ' || 'New salary = ' || trunc(t_emp.sal + t_emp.sal/100 * p_percent) ||'<br>');
 
            exception
                 when others then 
@@ -371,7 +371,8 @@ create or replace package body "PKG_EMP_SRV" as
                 dbms_output.put_line('Checking total salary information');
                 htp.p('Checking total salary information');
                 PKG_EMP_SRV.p_sal_rep(p_dept_id => null);
-                dbms_output.put_line('Deleting test employeer');
+                dbms_output.put_line('Test employeer EMP_ID = ' || v_EMP ||' deleted');                
+                htp.p('Test employeer EMP_ID = ' || v_EMP ||' deleted');                
                 delete emp_data where emp_id = v_EMP;
                 commit;
             end;
