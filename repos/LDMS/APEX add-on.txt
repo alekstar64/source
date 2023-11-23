@@ -1,0 +1,6 @@
+The file f145771.sql contains the project implementation installation that provides the required functionality using Oracle (v.19c EE)APEX (v.23.2.0).
+To import the project into your database, please refer to Oracle technical documentation.
+You can check the work of the project on the test system by clicking here:
+https://apex.oracle.com/pls/apex/r/alekstar/ldms/home
+mailto:alekstar64@gmail.com
+

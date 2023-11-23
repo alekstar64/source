@@ -6,6 +6,7 @@ This guide provides instructions for installing server-side components on Oracle
 1. **Oracle Database:** Ensure that Oracle Database 19c is installed on the server.
 2. **Privileges:** Ensure that you have the necessary privileges to create tables and database objects.
 3. **Scripts:** Download the PL/SQL script file (`LDMS_TABLES.sql`) to the server.
+4. **For more information about the Oracle APEX feature, see the "APEX add-on.txt" file.
 
 ## Installing the Database
 
